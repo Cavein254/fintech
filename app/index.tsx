@@ -1,23 +1,29 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import { useAssets } from "expo-asset";
-import { ResizeMode, Video } from "expo-av";
+import { useVideoPlayer, VideoView } from "expo-video";
 import { Link } from "expo-router";
 import { defaultStyles } from "@/constants/styles";
 import Colors from "@/constants/Colors";
 
 const Page = () => {
   const [assets] = useAssets([require("@/assets/videos/intro.mp4")]);
+  const videoSource = assets ? assets[0]?.uri : "";
+  const player = useVideoPlayer(videoSource, (player) => {
+    player.loop = true;
+    player.play();
+    player.playing;
+  });
   return (
     <View style={styles.container}>
       {assets && (
-        <Video
-          resizeMode={ResizeMode.COVER}
-          isMuted
-          isLooping
-          shouldPlay
-          source={{ uri: assets[0].uri }}
+        <VideoView
           style={styles.video}
+          player={player}
+          allowsFullscreen
+          allowsPictureInPicture
+          contentFit="cover"
+          nativeControls={false}
         />
       )}
       <View style={{ padding: 20 }}>
@@ -36,6 +42,18 @@ const Page = () => {
             <Text style={{ color: "white", fontSize: 22, fontWeight: 500 }}>
               Log In
             </Text>
+          </TouchableOpacity>
+        </Link>
+        <Link
+          href="/signup"
+          style={[
+            defaultStyles.pillButton,
+            { flex: 1, backgroundColor: "#fff" },
+          ]}
+          asChild
+        >
+          <TouchableOpacity>
+            <Text style={{ fontSize: 22, fontWeight: 500 }}>Sign Up</Text>
           </TouchableOpacity>
         </Link>
       </View>
