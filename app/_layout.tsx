@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { ClerkProvider } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
@@ -10,6 +11,9 @@ import { useEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
+import { tokenCache } from "@/cache/cache";
+
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -101,10 +105,12 @@ const InitialLayout = () => {
 
 function RootLayout() {
   return (
-    <GestureHandlerRootView>
-      <StatusBar style="light" />
-      <InitialLayout />
-    </GestureHandlerRootView>
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <GestureHandlerRootView>
+        <StatusBar style="light" />
+        <InitialLayout />
+      </GestureHandlerRootView>
+    </ClerkProvider>
   );
 }
 

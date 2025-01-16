@@ -10,14 +10,30 @@ import {
 import React from "react";
 import { defaultStyles } from "@/constants/styles";
 import Colors from "@/constants/Colors";
-import { Link } from "expo-router";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Link, useRouter } from "expo-router";
+import { useSignUp } from "@clerk/clerk-expo";
 
 const Page = () => {
   const [countryCode, setCountryCode] = React.useState("+254");
   const [phoneNumber, setPhoneNumber] = React.useState("");
   const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
-  const onSignup = async () => {};
+  const { signUp } = useSignUp();
+  const router = useRouter();
+
+  const onSignup = async () => {
+    const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+    try {
+      await signUp!.create({
+        phoneNumber: fullPhoneNumber,
+      });
+      router.push({
+        pathname: "/verify/[phone]",
+        params: { phone: `${fullPhoneNumber}` },
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
