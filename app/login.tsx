@@ -21,40 +21,36 @@ enum SignInType {
   Apple,
 }
 const Page = () => {
-  const [countryCode, setCountryCode] = React.useState("+254");
-  const [phoneNumber, setPhoneNumber] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [emailAddress, SetEmailAddress] = React.useState("");
   const router = useRouter();
-  const { signIn } = useSignIn();
+  const { signIn, setActive, isLoaded } = useSignIn();
   const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
-  const onSignIn = async (type: SignInType) => {
-    if (type === SignInType.Phone) {
-      const fullPhoneNumber = `${countryCode}${phoneNumber}`;
-      try {
-        const { supportedFirstFactors } = await signIn!.create({
-          identifier: fullPhoneNumber,
-        });
-        const firstPhoneFactor: any = supportedFirstFactors!.find(
-          (factor: any) => {
-            return factor.strategy === "phone_code";
+  const onSignIn = React.useCallback(
+    async (type: SignInType) => {
+      if (type === SignInType.Email) {
+        try {
+          const signInAttempt = await signIn!.create({
+            identifier: emailAddress,
+            password,
+          });
+
+          if (signInAttempt!.status === "complete") {
+            await setActive!({ session: signInAttempt.createdSessionId });
+            router.push({
+              pathname: "/verify/[email]",
+              params: { email: emailAddress, signin: "true" },
+            });
+          } else {
+            console.error(JSON.stringify(signInAttempt, null, 2));
           }
-        );
-
-        const { phoneNumberId } = firstPhoneFactor;
-
-        await signIn!.prepareFirstFactor({
-          strategy: "phone_code",
-          phoneNumberId,
-        });
-
-        router.push({
-          pathname: "/verify/[phone]",
-          params: { phone: fullPhoneNumber, signin: "true" },
-        });
-      } catch (err) {
-        console.log(err);
+        } catch (err) {
+          console.error(JSON.stringify(err, null, 2));
+        }
       }
-    }
-  };
+    },
+    [isLoaded, emailAddress, password]
+  );
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -68,25 +64,25 @@ const Page = () => {
         </Text>
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
-            placeholder="Country Code"
-            placeholderTextColor={Colors.gray}
-            value={countryCode}
-            onChangeText={(text) => setCountryCode(text)}
-          />
-          <TextInput
-            style={[styles.input, { flex: 1 }]}
+            style={[styles.input]}
             placeholderTextColor={Colors.gray}
             placeholder="Mobile Number"
             keyboardType="numeric"
-            value={phoneNumber}
-            onChangeText={(text) => setPhoneNumber(text)}
+            value={emailAddress}
+            onChangeText={(text) => SetEmailAddress(text)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Country Code"
+            placeholderTextColor={Colors.gray}
+            value={password}
+            onChangeText={(text) => setPassword(text)}
           />
         </View>
         <TouchableOpacity
           style={[
             defaultStyles.pillButton,
-            phoneNumber !== "" ? styles.enabled : styles.disabled,
+            emailAddress !== "" ? styles.enabled : styles.disabled,
             { marginBottom: 20 },
           ]}
           onPress={() => onSignIn(SignInType.Phone)}

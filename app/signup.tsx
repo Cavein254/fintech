@@ -17,17 +17,23 @@ const Page = () => {
   const [password, setPassword] = React.useState("");
   const [emailAddress, setEmailAddress] = React.useState("");
   const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
-  const { signUp } = useSignUp();
+  const { signUp, isLoaded } = useSignUp();
   const router = useRouter();
 
   const onSignup = async () => {
+    if (!isLoaded) return;
     try {
       await signUp!.create({
         emailAddress,
         password,
       });
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      router.push({
+        pathname: "/verify/[email]",
+        params: { email: emailAddress },
+      });
     } catch (err) {
-      console.log(err);
+      console.error(JSON.stringify(err, null, 2));
     }
   };
   return (
@@ -39,7 +45,7 @@ const Page = () => {
       <View style={defaultStyles.container}>
         <Text style={defaultStyles.header}>Let's get started!</Text>
         <Text style={defaultStyles.descriptionText}>
-          Enter your phone number. We will send you a confirmation code there
+          Enter your Email Address. We will send you a confirmation code there
         </Text>
         <View style={styles.inputContainer}>
           <TextInput

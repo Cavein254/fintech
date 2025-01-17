@@ -6,7 +6,7 @@ import {
   StyleSheet,
 } from "react-native";
 import React from "react";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useSignIn, useSignUp } from "@clerk/clerk-expo";
 import { defaultStyles } from "@/constants/styles";
 import {
@@ -19,11 +19,12 @@ import {
 const CELL_COUNT = 6;
 
 const Page = () => {
-  const { signIn } = useSignIn();
+  const router = useRouter();
+  const { signIn, isLoaded } = useSignIn();
   const { signUp, setActive } = useSignUp();
-  const { phone, signin } = useLocalSearchParams<{
-    phone: string;
-    signin: string;
+  const { email, signin } = useLocalSearchParams<{
+    email: string;
+    signin?: string;
   }>();
   const [code, setCode] = React.useState("");
   const ref = useBlurOnFulfill({ value: code, cellCount: CELL_COUNT });
@@ -35,20 +36,33 @@ const Page = () => {
 
   React.useEffect(() => {
     if (code.length === 6) {
+      console.log(`length ${code.length}`);
       if (signin === "true") {
+        console.log(`signIn ${signin}`);
+
         verifySignIn();
       } else {
+        console.log(`signup ${signin}`);
+
         verifyCode();
       }
     }
   }, [code]);
 
   const verifyCode = async () => {
+    if (!isLoaded) return;
     try {
-      await signUp!.attemptPhoneNumberVerification({ code });
-      await setActive!({ session: signUp!.createdSessionId });
+      const signUpAttempt = await signUp!.attemptEmailAddressVerification({
+        code,
+      });
+      if (signUpAttempt.status === "complete") {
+        await setActive!({ session: signUpAttempt.createdSessionId });
+        router.replace("/login");
+      } else {
+        console.error(JSON.stringify(signUpAttempt, null, 2));
+      }
     } catch (err) {
-      console.log(err);
+      console.error(JSON.stringify(err, null, 2));
     }
   };
 
@@ -67,7 +81,7 @@ const Page = () => {
     <View style={defaultStyles.container}>
       <Text style={defaultStyles.header}>6-digit code</Text>
       <Text style={defaultStyles.descriptionText}>
-        Code sent to {phone} unless you already have an account
+        Code sent to {email} unless you already have an account
       </Text>
       <CodeField
         ref={ref}
