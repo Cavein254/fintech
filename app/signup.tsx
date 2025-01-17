@@ -58,7 +58,7 @@ const Page = () => {
           />
           <TextInput
             style={styles.input}
-            placeholder="password"
+            placeholder="Password"
             placeholderTextColor={Colors.gray}
             keyboardType="visible-password"
             value={password}
@@ -90,7 +90,8 @@ const Page = () => {
 const styles = StyleSheet.create({
   inputContainer: {
     marginVertical: 40,
-    flexDirection: "row",
+    flexDirection: "column",
+    gap: 20,
   },
   input: {
     backgroundColor: Colors.lightGray,

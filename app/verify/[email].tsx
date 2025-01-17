@@ -36,16 +36,7 @@ const Page = () => {
 
   React.useEffect(() => {
     if (code.length === 6) {
-      console.log(`length ${code.length}`);
-      if (signin === "true") {
-        console.log(`signIn ${signin}`);
-
-        verifySignIn();
-      } else {
-        console.log(`signup ${signin}`);
-
-        verifyCode();
-      }
+      verifyCode();
     }
   }, [code]);
 
@@ -63,18 +54,6 @@ const Page = () => {
       }
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
-    }
-  };
-
-  const verifySignIn = async () => {
-    try {
-      await signIn!.attemptFirstFactor({
-        strategy: "phone_code",
-        code,
-      });
-      await setActive!({ session: signIn!.createdSessionId });
-    } catch (err) {
-      console.log(err);
     }
   };
   return (

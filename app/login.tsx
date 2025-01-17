@@ -37,10 +37,7 @@ const Page = () => {
 
           if (signInAttempt!.status === "complete") {
             await setActive!({ session: signInAttempt.createdSessionId });
-            router.push({
-              pathname: "/verify/[email]",
-              params: { email: emailAddress, signin: "true" },
-            });
+            router.push("/");
           } else {
             console.error(JSON.stringify(signInAttempt, null, 2));
           }
@@ -66,15 +63,16 @@ const Page = () => {
           <TextInput
             style={[styles.input]}
             placeholderTextColor={Colors.gray}
-            placeholder="Mobile Number"
-            keyboardType="numeric"
+            placeholder="Email Address"
+            keyboardType="email-address"
             value={emailAddress}
             onChangeText={(text) => SetEmailAddress(text)}
           />
           <TextInput
             style={styles.input}
-            placeholder="Country Code"
+            placeholder="Password"
             placeholderTextColor={Colors.gray}
+            keyboardType="visible-password"
             value={password}
             onChangeText={(text) => setPassword(text)}
           />
@@ -165,7 +163,8 @@ const Page = () => {
 const styles = StyleSheet.create({
   inputContainer: {
     marginVertical: 40,
-    flexDirection: "row",
+    flexDirection: "column",
+    gap: 20,
   },
   input: {
     backgroundColor: Colors.lightGray,
