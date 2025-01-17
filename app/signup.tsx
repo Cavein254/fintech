@@ -14,24 +14,20 @@ import { Link, useRouter } from "expo-router";
 import { useSignUp } from "@clerk/clerk-expo";
 
 const Page = () => {
-  const [countryCode, setCountryCode] = React.useState("+254");
-  const [phoneNumber, setPhoneNumber] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [emailAddress, setEmailAddress] = React.useState("");
   const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
   const { signUp } = useSignUp();
   const router = useRouter();
 
   const onSignup = async () => {
-    const fullPhoneNumber = `${countryCode}${phoneNumber}`;
     try {
       await signUp!.create({
-        phoneNumber: fullPhoneNumber,
+        emailAddress,
+        password,
       });
-      router.push({
-        pathname: "/verify/[phone]",
-        params: { phone: `${fullPhoneNumber}` },
-      });
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err);
     }
   };
   return (
@@ -47,19 +43,20 @@ const Page = () => {
         </Text>
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
-            placeholder="Country Code"
+            style={[styles.input]}
             placeholderTextColor={Colors.gray}
-            value={countryCode}
-            onChangeText={(text) => setCountryCode(text)}
+            placeholder="Email Address"
+            keyboardType="email-address"
+            value={emailAddress}
+            onChangeText={(text) => setEmailAddress(text)}
           />
           <TextInput
-            style={[styles.input, { flex: 1 }]}
+            style={styles.input}
+            placeholder="password"
             placeholderTextColor={Colors.gray}
-            placeholder="Mobile Number"
-            keyboardType="numeric"
-            value={phoneNumber}
-            onChangeText={(text) => setPhoneNumber(text)}
+            keyboardType="visible-password"
+            value={password}
+            onChangeText={(text) => setPassword(text)}
           />
         </View>
         <Link href="/login" replace asChild>
@@ -73,7 +70,7 @@ const Page = () => {
         <TouchableOpacity
           style={[
             defaultStyles.pillButton,
-            phoneNumber !== "" ? styles.enabled : styles.disabled,
+            emailAddress !== "" ? styles.enabled : styles.disabled,
           ]}
           onPress={onSignup}
         >
